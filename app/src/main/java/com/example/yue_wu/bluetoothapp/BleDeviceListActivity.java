@@ -11,9 +11,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.Toast;
 
@@ -24,9 +25,9 @@ import com.example.yue_wu.bluetoothapp.util.LogUtil;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class BleDeviceListActivity extends BaseActivity {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = BleDeviceListActivity.class.getSimpleName();
 
     private BluetoothAdapter mBluetoothAdapter;
 
@@ -42,7 +43,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         LogUtil.d(TAG,"onCreate Task id is "+getTaskId());
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_ble_device_list);
+        ActionBar actionBar = getSupportActionBar();
+        if(actionBar != null){
+            actionBar.setTitle(R.string.device_list);
+        }
         mScanRefresh = (SwipeRefreshLayout)findViewById(R.id.swipe_refresh);
         mScanRefresh.setColorSchemeResources(R.color.colorPrimary);
         mScanRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener(){
@@ -53,14 +58,14 @@ public class MainActivity extends AppCompatActivity {
         });
         RecyclerView recyclerView;
         recyclerView = (RecyclerView)findViewById(R.id.recycler_view);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        GridLayoutManager layoutManager = new GridLayoutManager(this,1);
         recyclerView.setLayoutManager(layoutManager);
         mBleScanDevicesAdpater = new BleScanDevicesAdpater(mDeviceList);
         recyclerView.setAdapter(mBleScanDevicesAdpater);
 
-        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.
+        if(ContextCompat.checkSelfPermission(BleDeviceListActivity.this, Manifest.permission.
                 ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(MainActivity.this,
+            ActivityCompat.requestPermissions(BleDeviceListActivity.this,
                     new String[]{ Manifest.permission.ACCESS_FINE_LOCATION },1);
         }else {
             openBluetooth();

@@ -22,16 +22,16 @@ public class BleScanDevicesAdpater  extends RecyclerView.Adapter<BleScanDevicesA
         mDeviceList = deviceList;
     }
     static class ViewHolder extends RecyclerView.ViewHolder{
-        TextView deviceName;
-        TextView deviceAddr;
-        TextView deviceRssi;
-        TextView deviceUpdateTime;
+        private TextView deviceName;
+        private TextView deviceAddr;
+        private TextView deviceRssi;
+        private TextView deviceAdvertise;
         public ViewHolder(View view){
             super(view);
-            deviceName = (TextView)view.findViewById(R.id.deviceName);
-            deviceAddr = (TextView)view.findViewById(R.id.deviceAddr);
-            deviceRssi = (TextView)view.findViewById(R.id.deviceRssi);
-            deviceUpdateTime = (TextView)view.findViewById(R.id.deviceUpdateTime);
+            deviceName = (TextView)view.findViewById(R.id.device_name);
+            deviceAddr = (TextView)view.findViewById(R.id.device_addr);
+            deviceRssi = (TextView)view.findViewById(R.id.device_rssi);
+            deviceAdvertise = (TextView)view.findViewById(R.id.device_advertise);
         }
     }
 
@@ -50,7 +50,7 @@ public class BleScanDevicesAdpater  extends RecyclerView.Adapter<BleScanDevicesA
         holder.deviceName.setText(device.getDeviceName());
         holder.deviceAddr.setText(device.getDeviceAddr());
         holder.deviceRssi.setText(device.getDeviceRssi());
-        holder.deviceUpdateTime.setText(device.getDeviceUpdateTime());
+        holder.deviceAdvertise.setText(device.getDeviceAdvertise());
     }
 
     @Override

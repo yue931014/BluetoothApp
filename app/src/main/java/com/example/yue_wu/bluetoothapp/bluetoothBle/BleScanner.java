@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
 
+import com.example.yue_wu.bluetoothapp.R;
 import com.example.yue_wu.bluetoothapp.util.LogUtil;
 
 import java.util.ArrayList;
@@ -93,11 +94,14 @@ public class BleScanner {
     public void startScan(){
        if(!mScanning){
            LogUtil.d(TAG,"startScan");
-            if (Build.VERSION.SDK_INT >= 21) {
-                mBluetoothLeScanner.startScan(mV21ScanCallback);
-            } else {
-                mBluetoothAdapter.startLeScan(mV18ScanCallback);
-            }
+           if (mBluetoothAdapter.isEnabled()) {
+               if (Build.VERSION.SDK_INT >= 21) {
+                   mBluetoothLeScanner.startScan(mV21ScanCallback);
+               } else {
+                   mBluetoothAdapter.startLeScan(mV18ScanCallback);
+               }
+               mScanning = true;
+           }
            /*
             mHandler.postDelayed(new Runnable() {
                 @Override
@@ -106,18 +110,21 @@ public class BleScanner {
                 }
             }, SCAN_PERIOD);
             */
-            mScanning = true;
+
         }
     }
 
     public void stopScan(){
         LogUtil.d(TAG,"stopScan");
-        if(Build.VERSION.SDK_INT >= 21 ){
-            mBluetoothLeScanner.stopScan(mV21ScanCallback);
-        }else{
-            mBluetoothAdapter.stopLeScan(mV18ScanCallback);
+        if (mBluetoothAdapter.isEnabled()) {
+            if (Build.VERSION.SDK_INT >= 21) {
+                mBluetoothLeScanner.stopScan(mV21ScanCallback);
+            } else {
+                mBluetoothAdapter.stopLeScan(mV18ScanCallback);
+            }
+            mScanning = false;
         }
-        mScanning = false;
+
     }
 
     /**
@@ -171,8 +178,8 @@ public class BleScanner {
         if(Build.VERSION.SDK_INT >= 21) {
             bleDevice.setDeviceName(scanResult.getDevice().getName());
             bleDevice.setDeviceAddr(scanResult.getDevice().getAddress());
-            bleDevice.setDeviceRssi(Integer.toString(scanResult.getRssi()));
-            bleDevice.setDeviceUpdateTime(getUpdateTime(scanResult.getTimestampNanos()));
+            bleDevice.setDeviceRssi(Integer.toString(scanResult.getRssi())+"dbm");
+            bleDevice.setDeviceAdvertise(bytesToHexStr(scanResult.getScanRecord().getBytes()));
         }
         return bleDevice;
     }
@@ -182,8 +189,8 @@ public class BleScanner {
         if(Build.VERSION.SDK_INT < 21) {
             bleDevice.setDeviceName(btDevice.getName());
             bleDevice.setDeviceAddr(btDevice.getAddress());
-            bleDevice.setDeviceRssi(Integer.toString(rssi));
-            bleDevice.setDeviceUpdateTime(null);
+            bleDevice.setDeviceRssi(Integer.toString(rssi)+ R.string.device_list);
+            bleDevice.setDeviceAdvertise(bytesToHexStr(scanRecord));
         }
         return bleDevice;
     }
@@ -195,5 +202,21 @@ public class BleScanner {
         }else{
             mDeviceList.add(bleDevice);
         }
+    }
+
+    /**
+     * byte[] to hex string
+     */
+    private String bytesToHexStr(byte[] b)
+    {
+        String stmp="";
+        StringBuilder sb = new StringBuilder("");
+        for (int n=0;n<b.length;n++)
+        {
+            stmp = Integer.toHexString(b[n] & 0xFF);
+            sb.append((stmp.length()==1)? "0"+stmp : stmp);
+            sb.append(" ");
+        }
+        return sb.toString().toUpperCase().trim();
     }
 }

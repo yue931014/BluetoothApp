@@ -8,7 +8,7 @@ public class BleDevice {
     private String deviceName;
     private String deviceAddr;
     private String deviceRssi;
-    private String deviceUpdateTime;
+    private String deviceAdvertise;
 
     public String getDeviceName() {
         return deviceName;
@@ -34,11 +34,11 @@ public class BleDevice {
         this.deviceRssi = deviceRssi;
     }
 
-    public String getDeviceUpdateTime() {
-        return deviceUpdateTime;
+    public String getDeviceAdvertise() {
+        return deviceAdvertise;
     }
 
-    public void setDeviceUpdateTime(String deviceUpdateTime) {
-        this.deviceUpdateTime = deviceUpdateTime;
+    public void setDeviceAdvertise(String deviceAdvertise) {
+        this.deviceAdvertise = deviceAdvertise;
     }
 }
