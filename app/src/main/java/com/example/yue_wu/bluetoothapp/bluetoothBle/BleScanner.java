@@ -30,8 +30,6 @@ public class BleScanner {
 
     private BluetoothLeScanner mBluetoothLeScanner;
 
-    private Handler mHandler;
-
     private ScanCallback mV21ScanCallback;
 
     private BluetoothAdapter.LeScanCallback mV18ScanCallback;
@@ -48,7 +46,7 @@ public class BleScanner {
         mBluetoothAdapter = btAdapter;
         mDeviceList = deviceList;
         mbleScanDevicesAdpater = bleScanDevicesAdpater;
-        mHandler = new Handler();
+
         if(Build.VERSION.SDK_INT >= 21){
             mBluetoothLeScanner = mBluetoothAdapter.getBluetoothLeScanner();
             mV21ScanCallback = new ScanCallback() {
@@ -102,21 +100,13 @@ public class BleScanner {
                }
                mScanning = true;
            }
-           /*
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    stopScan();
-                }
-            }, SCAN_PERIOD);
-            */
 
         }
     }
 
     public void stopScan(){
         LogUtil.d(TAG,"stopScan");
-        if (mBluetoothAdapter.isEnabled()) {
+        if (mScanning && mBluetoothLeScanner != null&& mBluetoothAdapter.isEnabled()) {
             if (Build.VERSION.SDK_INT >= 21) {
                 mBluetoothLeScanner.stopScan(mV21ScanCallback);
             } else {

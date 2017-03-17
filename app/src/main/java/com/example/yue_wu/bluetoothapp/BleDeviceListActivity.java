@@ -6,13 +6,12 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Message;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -37,6 +36,22 @@ public class BleDeviceListActivity extends BaseActivity {
 
     private BleScanDevicesAdpater mBleScanDevicesAdpater;
 
+    private Handler mHandler;
+
+    private Runnable mStopScanCallBack = new Runnable(){
+        @Override
+        public void run() {
+            mBleScanner.stopScan();
+            LogUtil.d(TAG,"onRefresh stop scan results");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    //mBleScanDevicesAdpater.notifyDataSetChanged();
+                    mScanRefresh.setRefreshing(false);
+                }
+            });
+        }
+    };
     private ArrayList<BleDevice> mDeviceList = new ArrayList<BleDevice>();
     public static final int REQUEST_ENABLE_BT = 1;
     @Override
@@ -73,7 +88,6 @@ public class BleDeviceListActivity extends BaseActivity {
     }
 
     private void openBluetooth(){
-        Message message = new Message();
 
         mBluetoothAdapter = ((BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE))
                 .getAdapter();
@@ -83,7 +97,7 @@ public class BleDeviceListActivity extends BaseActivity {
 
             // Is Bluetooth turned on?
             if (mBluetoothAdapter.isEnabled()) {
-                startBleScanResults();
+                initBleScan();
             } else {
                 // Prompt user to turn on Bluetooth (logic continues in onActivityResult()).
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -95,53 +109,35 @@ public class BleDeviceListActivity extends BaseActivity {
         }
     }
 
-    private void startBleScanResults(){
+    private void initBleScan(){
         mBleScanner = new BleScanner(mBluetoothAdapter,mBleScanDevicesAdpater,mDeviceList);
-        mScanRefresh.setRefreshing(true);
-        refreshScanResults();
+        mHandler = new Handler();
     }
 
     private void refreshScanResults(){
         LogUtil.d(TAG,"onRefresh start scan results");
+        mDeviceList.clear();
         mBleScanner.startScan();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try{
-                    Thread.sleep(BleScanner.SCAN_PERIOD);
-                }catch(InterruptedException e){
-                    e.printStackTrace();
-                }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        LogUtil.d(TAG,"onRefresh end scan results");
-                        mBleScanner.stopScan();
-                        //mBleScanDevicesAdpater.notifyDataSetChanged();
-                        mScanRefresh.setRefreshing(false);
-                    }
-                });
-            }
-        }).start();
+        mHandler.postDelayed(mStopScanCallBack, BleScanner.SCAN_PERIOD);
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case REQUEST_ENABLE_BT:
-
                 if (resultCode == RESULT_OK) {
-                    startBleScanResults();
+                    LogUtil.d(TAG,"bt enable");
+                    initBleScan();
                 } else {
-
                     // User declined to enable Bluetooth, exit the app.
                     Toast.makeText(this, "bluetooth not enable",
                             Toast.LENGTH_SHORT).show();
                     finish();
                 }
-
+            break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
+                break;
         }
     }
     @Override
@@ -152,10 +148,36 @@ public class BleDeviceListActivity extends BaseActivity {
                     openBluetooth();
                 }else{
                     Toast.makeText(this,"You denied the permission",Toast.LENGTH_SHORT).show();
+                    finish();
                 }
                 break;
             default:
                 break;
         }
+    }
+    @Override
+    protected void onResume() {
+        LogUtil.d(TAG,"onResume");
+        super.onResume();
+        if(mBleScanner != null) {
+            mScanRefresh.setRefreshing(true);
+            refreshScanResults();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        LogUtil.d(TAG,"onPause");
+        super.onPause();
+        if(mBleScanner != null) {
+            mBleScanner.stopScan();
+            mHandler.removeCallbacks(mStopScanCallBack);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        LogUtil.d(TAG,"onDestroy");
+        super.onDestroy();
     }
 }

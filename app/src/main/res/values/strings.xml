@@ -1,8 +1,12 @@
 <resources>
     <string name="app_name">BluetoothApp</string>
     <string name="device_list">Ble device list</string>
+    <string name="service_list">Ble service list</string>
+    <string name="characteristic_list">Ble characteristic list</string>
     <string name="rssi_unit">dbm</string>
     <string name="bt_turn_off_title">Warning</string>
     <string name="bt_turn_off_message">Bluetooth switch is off.</string>
     <string name="bt_turn_off_button">OK</string>
+    <string name="discovery_service">Discovering service.</string>
+    <string name="connect_device">Connecting.</string>
 </resources>

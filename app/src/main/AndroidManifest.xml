@@ -21,7 +21,12 @@
         </activity>
         <activity android:name=".BleServiceListActivity" />
         <activity android:name=".BleCharacteristicListActivity" />
-        <activity android:name=".BaseActivity"/>
+        <activity android:name=".BaseActivity" />
+
+        <service
+            android:name=".bluetoothBle.BleService"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>
